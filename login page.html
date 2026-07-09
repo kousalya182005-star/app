@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login System</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#0f172a;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    width:400px;
+    background:white;
+    border-radius:10px;
+    box-shadow:0 0 20px rgba(0,0,0,.3);
+    overflow:hidden;
+}
+
+.header{
+    display:flex;
+}
+
+.header button{
+    width:50%;
+    padding:15px;
+    border:none;
+    background:#ddd;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.header button.active{
+    background:#2563eb;
+    color:white;
+}
+
+.form{
+    display:none;
+    padding:25px;
+}
+
+.form.active{
+    display:block;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+button.submit{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button.submit:hover{
+    background:#1d4ed8;
+}
+
+.generate{
+    background:green;
+    color:white;
+    border:none;
+    padding:10px;
+    width:100%;
+    border-radius:5px;
+    margin-top:10px;
+    cursor:pointer;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <button id="signupBtn" class="active">Login</button>
+        <button id="signinBtn">Sign In</button>
+    </div>
+
+    <!-- Registration -->
+    <div id="signup" class="form active">
+
+        <h2>Create Account</h2>
+
+        <input type="text" placeholder="Username">
+
+        <input type="password" placeholder="Password">
+
+        <input type="text" placeholder="Phone Number">
+
+        <button class="generate" onclick="generateOTP()">
+            Generate OTP
+        </button>
+
+        <input type="text" placeholder="Enter OTP">
+
+        <button class="submit">
+            Register
+        </button>
+
+    </div>
+
+    <!-- Sign In -->
+    <div id="signin" class="form">
+
+        <h2>Sign In</h2>
+
+        <input type="text" placeholder="Username">
+
+        <input type="password" placeholder="Password">
+
+        <button class="generate" onclick="generateOTP()">
+            Generate OTP
+        </button>
+
+        <input type="text" placeholder="Enter OTP">
+
+        <button class="submit">
+            Sign In
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+const signup=document.getElementById("signup");
+const signin=document.getElementById("signin");
+
+const signupBtn=document.getElementById("signupBtn");
+const signinBtn=document.getElementById("signinBtn");
+
+signupBtn.onclick=function(){
+
+signup.classList.add("active");
+signin.classList.remove("active");
+
+signupBtn.classList.add("active");
+signinBtn.classList.remove("active");
+
+}
+
+signinBtn.onclick=function(){
+
+signin.classList.add("active");
+signup.classList.remove("active");
+
+signinBtn.classList.add("active");
+signupBtn.classList.remove("active");
+
+}
+
+function generateOTP(){
+
+let otp=Math.floor(100000+Math.random()*900000);
+
+alert("Demo OTP : "+otp);
+
+}
+
+</script>
+
+</body>
+</html>
