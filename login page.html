@@ -102,87 +102,138 @@ button.submit:hover{
         <button id="signinBtn">Sign In</button>
     </div>
 
-    <!-- Registration -->
     <div id="signup" class="form active">
-
         <h2>Create Account</h2>
 
-        <input type="text" placeholder="Username">
-
-        <input type="password" placeholder="Password">
-
-        <input type="text" placeholder="Phone Number">
-
-        <button class="generate" onclick="generateOTP()">
-            Generate OTP
-        </button>
-
-        <input type="text" placeholder="Enter OTP">
-
-        <button class="submit">
-            Register
-        </button>
-
+        <input id="signupUsername" type="text" placeholder="Username">
+        <input id="signupPassword" type="password" placeholder="Password">
+        <input id="signupPhone" type="text" placeholder="Phone Number">
+        <button id="signupGenerateOtp" class="generate" type="button">Generate OTP</button>
+        <input id="signupOtp" type="text" placeholder="Enter OTP">
+        <button id="signupSubmit" class="submit" type="button">Register</button>
+        <div id="signupStatus" class="status-message"></div>
     </div>
 
-    <!-- Sign In -->
     <div id="signin" class="form">
-
         <h2>Sign In</h2>
 
-        <input type="text" placeholder="Username">
+        <input id="signinUsername" type="text" placeholder="Username">
+        <input id="signinPassword" type="password" placeholder="Password">
+        <input id="signinPhone" type="text" placeholder="Phone Number">
+        <button id="signinGenerateOtp" class="generate" type="button">Generate OTP</button>
+        <input id="signinOtp" type="text" placeholder="Enter OTP">
+        <button id="signinSubmit" class="submit" type="button">Sign In</button>
+        <div id="signinStatus" class="status-message"></div>
+    </div>
 
-        <input type="password" placeholder="Password">
-
-        <button class="generate" onclick="generateOTP()">
-            Generate OTP
-        </button>
-
-        <input type="text" placeholder="Enter OTP">
-
-        <button class="submit">
-            Sign In
-        </button>
-
+    <div id="qrSection">
+        <h2>Session QR Code</h2>
+        <div id="qrCode">Your QR data will appear here after successful sign in.</div>
     </div>
 
 </div>
 
 <script>
 
-const signup=document.getElementById("signup");
-const signin=document.getElementById("signin");
+const signup = document.getElementById('signup');
+const signin = document.getElementById('signin');
+const signupBtn = document.getElementById('signupBtn');
+const signinBtn = document.getElementById('signinBtn');
+const qrSection = document.getElementById('qrSection');
+const qrCode = document.getElementById('qrCode');
 
-const signupBtn=document.getElementById("signupBtn");
-const signinBtn=document.getElementById("signinBtn");
+signupBtn.addEventListener('click', () => {
+  signup.classList.add('active');
+  signin.classList.remove('active');
+  signupBtn.classList.add('active');
+  signinBtn.classList.remove('active');
+  qrSection.style.display = 'none';
+});
 
-signupBtn.onclick=function(){
+signinBtn.addEventListener('click', () => {
+  signin.classList.add('active');
+  signup.classList.remove('active');
+  signinBtn.classList.add('active');
+  signupBtn.classList.remove('active');
+  qrSection.style.display = 'none';
+});
 
-signup.classList.add("active");
-signin.classList.remove("active");
-
-signupBtn.classList.add("active");
-signinBtn.classList.remove("active");
-
+function showStatus(elementId, message, success = true) {
+  const el = document.getElementById(elementId);
+  el.textContent = message;
+  el.style.color = success ? '#16a34a' : '#dc2626';
 }
 
-signinBtn.onclick=function(){
+async function requestOtp(action) {
+  const username = document.getElementById(`${action}Username`).value.trim();
+  const phone = document.getElementById(`${action}Phone`).value.trim();
+  const statusId = `${action}Status`;
 
-signin.classList.add("active");
-signup.classList.remove("active");
+  if (!username || !phone) {
+    showStatus(statusId, 'Please enter username and phone number.', false);
+    return;
+  }
 
-signinBtn.classList.add("active");
-signupBtn.classList.remove("active");
+  try {
+    const response = await fetch('/generate-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, phone, action: action === 'signup' ? 'register' : 'signin' }),
+    });
 
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      showStatus(statusId, data.message || 'OTP request failed.', false);
+      return;
+    }
+
+    showStatus(statusId, `OTP generated. Use code: ${data.otp}`);
+  } catch (error) {
+    showStatus(statusId, 'Unable to generate OTP. Please try again.', false);
+  }
 }
 
-function generateOTP(){
+async function submitForm(action) {
+  const username = document.getElementById(`${action}Username`).value.trim();
+  const password = document.getElementById(`${action}Password`).value.trim();
+  const phone = document.getElementById(`${action}Phone`).value.trim();
+  const otp = document.getElementById(`${action}Otp`).value.trim();
+  const statusId = `${action}Status`;
+  const endpoint = action === 'signup' ? '/register' : '/signin';
 
-let otp=Math.floor(100000+Math.random()*900000);
+  if (!username || !password || !phone || !otp) {
+    showStatus(statusId, 'Please fill in all fields and OTP.', false);
+    return;
+  }
 
-alert("Demo OTP : "+otp);
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, phone, otp }),
+    });
 
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      showStatus(statusId, data.message || 'Request failed.', false);
+      return;
+    }
+
+    showStatus(statusId, data.message);
+
+    if (action === 'signin') {
+      qrSection.style.display = 'block';
+      qrCode.textContent = data.qrData || 'QR session data generated.';
+    }
+  } catch (error) {
+    showStatus(statusId, 'Unable to complete request. Please try again.', false);
+  }
 }
+
+document.getElementById('signupGenerateOtp').addEventListener('click', () => requestOtp('signup'));
+document.getElementById('signinGenerateOtp').addEventListener('click', () => requestOtp('signin'));
+document.getElementById('signupSubmit').addEventListener('click', () => submitForm('signup'));
+document.getElementById('signinSubmit').addEventListener('click', () => submitForm('signin'));
 
 </script>
 
